@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marriage Time Tracker — The Virtuous Wife Academy™</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:#C96B8A; --rose-light:#F5E0E8; --rose-pale:#FDF5F8;
+    --gold:#B8933A; --gold-light:#F7EDD6;
+    --together:#7F44A8; --together-light:#C9A8E8;
+    --her:#B8365A; --her-light:#EDA0B8;
+    --him:#1D8A72; --him-light:#7DCFBE;
+    --sleep:#C07A1A; --sleep-light:#F2CFA0;
+    --light:#FAF7FB; --white:#FFFFFF; --border:#E8DFF0;
+    --text:#2D2535; --text-muted:#7A6E82;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);min-height:100vh}
+
+  /* PASSWORD GATE */
+  #pw-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(145deg,#FDF5F8,#F0E8F8);display:flex;align-items:center;justify-content:center}
+  .pw-box{background:#fff;border-radius:20px;border:1px solid var(--border);padding:40px 36px;text-align:center;max-width:380px;width:90%}
+  .pw-logo{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose);background:var(--rose-light);padding:4px 14px;border-radius:20px;display:inline-block;margin-bottom:16px}
+  .pw-box h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);margin-bottom:6px}
+  .pw-box p{font-size:13px;color:var(--text-muted);margin-bottom:20px}
+  .pw-input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);text-align:center;letter-spacing:3px;outline:none;margin-bottom:12px;transition:border-color .2s}
+  .pw-input:focus{border-color:var(--rose)}
+  .pw-input.error{border-color:#C0392B;animation:shake .3s}
+  .pw-btn{width:100%;padding:13px;background:var(--rose);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s}
+  .pw-btn:hover{background:#B55A78}
+  .pw-err{font-size:12px;color:#C0392B;margin-top:8px;min-height:18px}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+  /* HEADER */
+  .header{background:#fff;border-bottom:1px solid var(--border);padding:28px 40px 24px;text-align:center}
+  .header-accent{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+  .header-line{flex:1;max-width:80px;height:1px;background:var(--rose-light)}
+  .header-icon{font-size:18px;color:var(--rose)}
+  .header h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+  .header h1 span{color:var(--rose)}
+  .header p{font-size:13px;color:var(--text-muted);margin-top:6px;font-weight:300;letter-spacing:.3px}
+  .brand-tag{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose);background:var(--rose-light);padding:4px 14px;border-radius:20px;display:inline-block;margin-bottom:12px}
+
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px}
+
+  /* SETUP */
+  .setup-card{background:#fff;border-radius:16px;border:1px solid var(--border);padding:28px 32px;margin-bottom:28px}
+  .setup-card h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--text);margin-bottom:6px}
+  .setup-card > p{font-size:13px;color:var(--text-muted);margin-bottom:20px}
+  .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:640px){.setup-grid{grid-template-columns:1fr}}
+  .person-block{border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+  .person-block.her{border-top:3px solid var(--her)}
+  .person-block.him{border-top:3px solid var(--him)}
+  .person-label{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+  .person-block.her .person-label{color:var(--her)}
+  .person-block.him .person-label{color:var(--him)}
+  .field-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .field-group{flex:1;min-width:80px}
+  .field-group label{font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px}
+  .field-group select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--light);appearance:none;cursor:pointer;outline:none}
+  .field-group select:focus{border-color:var(--rose)}
+  .day-checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .day-check{display:none}
+  .day-check+label{padding:5px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text-muted);transition:all .15s;user-select:none}
+  .her-days .day-check:checked+label{background:var(--her);color:#fff;border-color:var(--her)}
+  .him-days .day-check:checked+label{background:var(--him);color:#fff;border-color:var(--him)}
+  .generate-btn{width:100%;margin-top:22px;padding:14px 24px;background:var(--rose);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;letter-spacing:.3px;transition:background .2s}
+  .generate-btn:hover{background:#B55A78}
+
+  /* LEGEND */
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)}
+  .legend-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+
+  /* SCHEDULE */
+  .schedule-wrapper{display:none}
+  .schedule-wrapper.visible{display:block}
+  .schedule-card{background:#fff;border-radius:16px;border:1px solid var(--border);padding:24px 20px;margin-bottom:24px;overflow-x:auto}
+  .schedule-card h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--text);margin-bottom:4px}
+  .schedule-card p{font-size:12px;color:var(--text-muted);margin-bottom:18px}
+  .grid-container{min-width:640px}
+  .grid-table{width:100%;border-collapse:collapse;table-layout:fixed}
+  .grid-table th{font-size:11px;font-weight:500;letter-spacing:.5px;color:var(--text-muted);padding:6px 4px;text-align:center;text-transform:uppercase}
+  .grid-table td{padding:2px;vertical-align:top}
+  .time-col{width:52px;font-size:10px;color:var(--text-muted);text-align:right;padding-right:8px!important;white-space:nowrap}
+  .slot{display:block;width:100%;height:34px;border-radius:4px;border:none;cursor:pointer;position:relative;overflow:hidden;transition:filter .15s}
+  .slot:hover{filter:brightness(.9)}
+  .slot input{position:absolute;inset:0;width:100%;height:100%;background:transparent;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;text-align:center;cursor:pointer;padding:0 2px}
+  .slot.together{background:var(--together-light)}
+  .slot.together input{color:#3A006F}
+  .slot.her{background:var(--her-light)}
+  .slot.her input{color:#5A0020}
+  .slot.him{background:var(--him-light)}
+  .slot.him input{color:#003D2A}
+  .slot.sleep{background:var(--sleep-light)}
+  .slot.sleep input{color:#6B3A00}
+  .slot.free{background:#EDE9F3}
+  .slot.free input{color:#5A4E6B}
+
+  /* SUMMARY */
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px}
+  .summary-card{border-radius:12px;padding:16px 14px;text-align:center}
+  .summary-card.together{background:var(--together-light)}
+  .summary-card.her{background:var(--her-light)}
+  .summary-card.him{background:var(--him-light)}
+  .summary-card.sleep{background:var(--sleep-light)}
+  .summary-card .num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700}
+  .summary-card.together .num{color:var(--together)}
+  .summary-card.her .num{color:var(--her)}
+  .summary-card.him .num{color:var(--him)}
+  .summary-card.sleep .num{color:var(--sleep)}
+  .summary-card .lbl{font-size:11px;color:var(--text-muted);margin-top:4px}
+
+  /* WINDOWS */
+  .windows-card,.notes-card{background:#fff;border-radius:16px;border:1px solid var(--border);padding:24px 28px;margin-bottom:24px}
+  .windows-card h2,.notes-card h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--text);margin-bottom:4px}
+  .windows-card p,.notes-card p{font-size:12px;color:var(--text-muted);margin-bottom:18px}
+  .window-list{display:flex;flex-direction:column;gap:8px}
+  .window-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;background:var(--together-light);border-left:3px solid var(--together)}
+  .window-item .wi-day{font-size:13px;font-weight:500;color:var(--together);min-width:120px}
+  .window-item .wi-time{font-size:12px;color:var(--text-muted)}
+  .window-item .wi-badge{margin-left:auto;font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--together);color:#fff;white-space:nowrap}
+  .no-windows{font-size:13px;color:var(--text-muted);font-style:italic;padding:12px 0}
+
+  /* NOTES */
+  .notes-area{width:100%;border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--light);resize:vertical;min-height:100px;outline:none;line-height:1.6}
+  .notes-area:focus{border-color:var(--rose)}
+  .intentions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  @media(max-width:500px){.intentions-grid{grid-template-columns:1fr}}
+  .intention-item{display:flex;align-items:center;gap:10px;background:#FDF5F8;border-radius:8px;padding:10px 14px}
+  .intention-item input[type=checkbox]{accent-color:var(--rose);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+  .intention-item label{font-size:12px;color:var(--text);line-height:1.4;cursor:pointer}
+
+  /* ACTIONS */
+  .actions-bar{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap}
+  .pdf-btn{flex:1;padding:15px 24px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;letter-spacing:.3px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;min-width:200px}
+  .pdf-btn:hover{background:#9E7A29}
+  .pdf-btn:disabled{opacity:.6;cursor:not-allowed}
+  .reset-btn{padding:15px 20px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s}
+  .reset-btn:hover{background:var(--light);color:var(--text)}
+</style>
+</head>
+<body>
+
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-logo">The Virtuous Wife Academy™</div>
+    <h2>Members Only ♡</h2>
+    <p>This tool is exclusively for VWA community members.<br>Enter your access password to continue.</p>
+    <input class="pw-input" type="password" id="pw-input" placeholder="••••••••" maxlength="30" onkeydown="if(event.key==='Enter')checkPW()">
+    <button class="pw-btn" onclick="checkPW()">Enter</button>
+    <div class="pw-err" id="pw-err"></div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="brand-tag">The Virtuous Wife Academy™</div>
+  <div class="header-accent">
+    <div class="header-line"></div>
+    <span class="header-icon">♡</span>
+    <div class="header-line"></div>
+  </div>
+  <h1>Marriage <span>Time Tracker</span></h1>
+  <p>See where your hours go — and protect the ones that matter most.</p>
+</div>
+
+<div class="container">
+
+  <div class="setup-card">
+    <h2>Set Up Your Schedule</h2>
+    <p>Enter your work schedules below. Check the days each of you works, then click Generate to see your week.</p>
+    <div class="setup-grid">
+
+      <div class="person-block her">
+        <div class="person-label">Your Schedule (Wife)</div>
+        <div class="field-row">
+          <div class="field-group"><label>Work starts</label>
+            <select id="her-start">
+              <option value="5">5:00 AM</option><option value="6">6:00 AM</option><option value="7">7:00 AM</option>
+              <option value="8">8:00 AM</option><option value="9">9:00 AM</option><option value="10">10:00 AM</option>
+              <option value="11">11:00 AM</option><option value="12">12:00 PM</option><option value="13">1:00 PM</option>
+              <option value="14">2:00 PM</option><option value="15" selected>3:00 PM</option><option value="16">4:00 PM</option>
+              <option value="17">5:00 PM</option><option value="18">6:00 PM</option><option value="19">7:00 PM</option>
+              <option value="20">8:00 PM</option><option value="21">9:00 PM</option><option value="22">10:00 PM</option>
+            </select>
+          </div>
+          <div class="field-group"><label>Work ends</label>
+            <select id="her-end">
+              <option value="13">1:00 PM</option><option value="14">2:00 PM</option><option value="15">3:00 PM</option>
+              <option value="16">4:00 PM</option><option value="17">5:00 PM</option><option value="18">6:00 PM</option>
+              <option value="19">7:00 PM</option><option value="20">8:00 PM</option><option value="21">9:00 PM</option>
+              <option value="22">10:00 PM</option><option value="23" selected>11:00 PM</option><option value="0">Midnight</option>
+              <option value="1">1:00 AM</option><option value="2">2:00 AM</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Bedtime</label>
+            <select id="her-sleep">
+              <option value="21">9:00 PM</option><option value="22">10:00 PM</option><option value="23">11:00 PM</option>
+              <option value="0">Midnight</option><option value="1" selected>1:00 AM</option><option value="2">2:00 AM</option><option value="3">3:00 AM</option>
+            </select>
+          </div>
+          <div class="field-group"><label>Wake up</label>
+            <select id="her-wake">
+              <option value="5">5:00 AM</option><option value="6">6:00 AM</option>
+              <option value="7" selected>7:00 AM</option><option value="8">8:00 AM</option>
+              <option value="9">9:00 AM</option><option value="10">10:00 AM</option><option value="11">11:00 AM</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;margin-top:4px">Work days</div>
+        <div class="day-checks her-days" id="her-days">
+          <input class="day-check" type="checkbox" id="hd0" data-day="0"><label for="hd0">Mon</label>
+          <input class="day-check" type="checkbox" id="hd1" data-day="1" checked><label for="hd1">Tue</label>
+          <input class="day-check" type="checkbox" id="hd2" data-day="2" checked><label for="hd2">Wed</label>
+          <input class="day-check" type="checkbox" id="hd3" data-day="3" checked><label for="hd3">Thu</label>
+          <input class="day-check" type="checkbox" id="hd4" data-day="4" checked><label for="hd4">Fri</label>
+          <input class="day-check" type="checkbox" id="hd5" data-day="5" checked><label for="hd5">Sat</label>
+          <input class="day-check" type="checkbox" id="hd6" data-day="6"><label for="hd6">Sun</label>
+        </div>
+      </div>
+
+      <div class="person-block him">
+        <div class="person-label">His Schedule (Husband)</div>
+        <div class="field-row">
+          <div class="field-group"><label>Work starts</label>
+            <select id="him-start">
+              <option value="5">5:00 AM</option><option value="6">6:00 AM</option>
+              <option value="7" selected>7:00 AM</option><option value="8">8:00 AM</option>
+              <option value="9">9:00 AM</option><option value="10">10:00 AM</option><option value="11">11:00 AM</option>
+              <option value="12">12:00 PM</option><option value="13">1:00 PM</option><option value="14">2:00 PM</option>
+            </select>
+          </div>
+          <div class="field-group"><label>Work ends</label>
+            <select id="him-end">
+              <option value="11">11:00 AM</option><option value="12">12:00 PM</option><option value="13">1:00 PM</option>
+              <option value="14">2:00 PM</option><option value="15">3:00 PM</option><option value="16" selected>4:00 PM</option>
+              <option value="17">5:00 PM</option><option value="18">6:00 PM</option><option value="19">7:00 PM</option>
+              <option value="20">8:00 PM</option><option value="21">9:00 PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Bedtime</label>
+            <select id="him-sleep">
+              <option value="19">7:00 PM</option><option value="20">8:00 PM</option>
+              <option value="21" selected>9:00 PM</option><option value="22">10:00 PM</option>
+              <option value="23">11:00 PM</option><option value="0">Midnight</option>
+            </select>
+          </div>
+          <div class="field-group"><label>Wake up</label>
+            <select id="him-wake">
+              <option value="4">4:00 AM</option><option value="5">5:00 AM</option>
+              <option value="6" selected>6:00 AM</option><option value="7">7:00 AM</option>
+              <option value="8">8:00 AM</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;margin-top:4px">Work days</div>
+        <div class="day-checks him-days" id="him-days">
+          <input class="day-check" type="checkbox" id="hmd0" data-day="0" checked><label for="hmd0">Mon</label>
+          <input class="day-check" type="checkbox" id="hmd1" data-day="1" checked><label for="hmd1">Tue</label>
+          <input class="day-check" type="checkbox" id="hmd2" data-day="2" checked><label for="hmd2">Wed</label>
+          <input class="day-check" type="checkbox" id="hmd3" data-day="3" checked><label for="hmd3">Thu</label>
+          <input class="day-check" type="checkbox" id="hmd4" data-day="4" checked><label for="hmd4">Fri</label>
+          <input class="day-check" type="checkbox" id="hmd5" data-day="5"><label for="hmd5">Sat</label>
+          <input class="day-check" type="checkbox" id="hmd6" data-day="6"><label for="hmd6">Sun</label>
+        </div>
+      </div>
+    </div>
+    <button class="generate-btn" onclick="generateSchedule()">✦ Generate My Time Map</button>
+  </div>
+
+  <div class="schedule-wrapper" id="schedule-wrapper">
+
+    <div class="summary-grid">
+      <div class="summary-card together"><div class="num" id="sum-together">0</div><div class="lbl">Together hrs/week</div></div>
+      <div class="summary-card her"><div class="num" id="sum-her">0</div><div class="lbl">Your work hrs/week</div></div>
+      <div class="summary-card him"><div class="num" id="sum-him">0</div><div class="lbl">His work hrs/week</div></div>
+      <div class="summary-card sleep"><div class="num" id="sum-sleep">0</div><div class="lbl">Sleep hrs/week</div></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--together-light);border:2px solid var(--together)"></div>Together time</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--her-light);border:2px solid var(--her)"></div>You at work</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--him-light);border:2px solid var(--him)"></div>Him at work</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--sleep-light);border:2px solid var(--sleep)"></div>Sleep</div>
+      <span style="font-size:11px;color:var(--text-muted);margin-left:6px">Click any block to label your activity</span>
+    </div>
+
+    <div class="schedule-card">
+      <h2>Your Week at a Glance</h2>
+      <p>Each row = one hour. Click any block to type in what you do during that time.</p>
+      <div class="grid-container">
+        <table class="grid-table">
+          <thead><tr>
+            <th class="time-col"></th>
+            <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
+          </tr></thead>
+          <tbody id="grid-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="windows-card">
+      <h2>Your Together Windows ♡</h2>
+      <p>Hours when both of you are awake and neither is at work — protect these with intention.</p>
+      <div class="window-list" id="window-list"></div>
+    </div>
+
+    <div class="notes-card">
+      <h2>My Intentions This Week</h2>
+      <p>Small acts of love in the margins of a busy schedule are still love.</p>
+      <textarea class="notes-area" id="notes-area" placeholder="Lord, help me be present in the moments I have with my husband. This week I want to..."></textarea>
+      <div class="intentions-grid">
+        <div class="intention-item"><input type="checkbox" id="i1"><label for="i1">Make his lunch the night before</label></div>
+        <div class="intention-item"><input type="checkbox" id="i2"><label for="i2">Leave him a note or text during the day</label></div>
+        <div class="intention-item"><input type="checkbox" id="i3"><label for="i3">Protect our together windows — no errands</label></div>
+        <div class="intention-item"><input type="checkbox" id="i4"><label for="i4">Pray specifically for him this week</label></div>
+        <div class="intention-item"><input type="checkbox" id="i5"><label for="i5">Plan one intentional moment together</label></div>
+        <div class="intention-item"><input type="checkbox" id="i6"><label for="i6">Say something affirming every day</label></div>
+      </div>
+    </div>
+
+    <div class="actions-bar">
+      <button class="pdf-btn" id="pdf-btn" onclick="downloadPDF()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Save / Download as PDF
+      </button>
+      <button class="reset-btn" onclick="resetAll()">Start Over</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ── PASSWORD ── */
+function checkPW(){
+  const inp=document.getElementById('pw-input');
+  const err=document.getElementById('pw-err');
+  if(inp.value.toLowerCase()==='virtue'){
+    document.getElementById('pw-gate').style.display='none';
+  } else {
+    inp.classList.add('error');
+    err.textContent='Incorrect password. Please try again.';
+    inp.value='';
+    setTimeout(()=>inp.classList.remove('error'),400);
+  }
+}
+
+/* ── HELPERS ── */
+function val(id){ return parseInt(document.getElementById(id).value); }
+function getHerDays(){ return [...document.querySelectorAll('#her-days .day-check:checked')].map(e=>+e.dataset.day); }
+function getHimDays(){ return [...document.querySelectorAll('#him-days .day-check:checked')].map(e=>+e.dataset.day); }
+function fmtH(h){ h=((h%24)+24)%24; return h===0?'12am':h<12?h+'am':h===12?'12pm':(h-12)+'pm'; }
+
+/* Inclusive range check handling midnight wrap */
+function isBetween(h,start,end){
+  if(start===end) return false;
+  if(start<end) return h>=start && h<end;
+  return h>=start || h<end; // wraps midnight
+}
+
+function getSlotType(day,hour){
+  const herS=val('her-start'), herE=val('her-end');
+  const himS=val('him-start'), himE=val('him-end');
+  const herBed=val('her-sleep'), herUp=val('her-wake');
+  const himBed=val('him-sleep'), himUp=val('him-wake');
+  const herDays=getHerDays(), himDays=getHimDays();
+  // Sleep takes priority
+  if(isBetween(hour,herBed,herUp)||isBetween(hour,himBed,himUp)) return 'sleep';
+  const herWorking=herDays.includes(day)&&isBetween(hour,herS,herE);
+  const himWorking=himDays.includes(day)&&isBetween(hour,himS,himE);
+  if(herWorking) return 'her';
+  if(himWorking) return 'him';
+  return 'together';
+}
+
+/* ── GENERATE GRID ── */
+let slotData={};
+let lastTogMap={};
+
+function generateSchedule(){
+  const wrapper=document.getElementById('schedule-wrapper');
+  wrapper.classList.add('visible');
+  const tbody=document.getElementById('grid-body');
+  tbody.innerHTML='';
+  slotData={};
+  let cTog=0,cHer=0,cHim=0,cSlp=0;
+  const togMap={};
+
+  for(let hour=5;hour<29;hour++){
+    const h=((hour)%24); // 0-23
+    const label=fmtH(h);
+    const tr=document.createElement('tr');
+    const timeTd=document.createElement('td');
+    timeTd.className='time-col'; timeTd.textContent=label;
+    tr.appendChild(timeTd);
+
+    for(let day=0;day<7;day++){
+      const type=getSlotType(day,h);
+      const key=day+'-'+hour;
+      slotData[key]='';
+      if(type==='together'){ cTog++; if(!togMap[day]) togMap[day]=[]; togMap[day].push(h); }
+      if(type==='her') cHer++;
+      if(type==='him') cHim++;
+      if(type==='sleep') cSlp++;
+
+      const td=document.createElement('td');
+      const div=document.createElement('div');
+      div.className='slot '+type;
+      const inp=document.createElement('input');
+      inp.type='text'; inp.maxLength=22; inp.value=''; inp.dataset.key=key;
+      inp.addEventListener('input',function(){ slotData[this.dataset.key]=this.value; });
+      div.appendChild(inp); td.appendChild(div); tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+
+  document.getElementById('sum-together').textContent=cTog;
+  document.getElementById('sum-her').textContent=cHer;
+  document.getElementById('sum-him').textContent=cHim;
+  document.getElementById('sum-sleep').textContent=cSlp;
+  lastTogMap=togMap;
+  buildWindows(togMap);
+  wrapper.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function buildWindows(map){
+  const list=document.getElementById('window-list');
+  list.innerHTML='';
+  const dayNames=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const entries=Object.entries(map).sort((a,b)=>+a[0]-+b[0]);
+  if(!entries.length){
+    list.innerHTML='<p class="no-windows">No shared free time found — consider one shared day off together.</p>';
+    return;
+  }
+  entries.forEach(([day,hours])=>{
+    const span=hours.length;
+    const badge=span>=4?'Best window':span>=2?'Good window':'Short window';
+    const item=document.createElement('div');
+    item.className='window-item';
+    item.innerHTML=`<span class="wi-day">${dayNames[day]}</span><span class="wi-time">${fmtH(hours[0])} – ${fmtH((hours[hours.length-1]+1)%24)} &nbsp;·&nbsp; ${span} hr${span!==1?'s':''}</span><span class="wi-badge">${badge}</span>`;
+    list.appendChild(item);
+  });
+}
+
+/* ── PDF — 2 PAGE LAYOUT ── */
+function downloadPDF(){
+  const btn=document.getElementById('pdf-btn');
+  btn.textContent='Building PDF…';
+  btn.disabled=true;
+
+  setTimeout(()=>{
+    try{
+      const {jsPDF}=window.jspdf;
+      // Landscape A4
+      const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+      const PW=297,PH=210,M=12;
+
+      // Palette
+      const C={
+        together:[201,168,232], her:[237,160,184], him:[125,207,190],
+        sleep:[242,207,160], togDark:[127,68,168], herDark:[184,54,90],
+        himDark:[29,138,114], sleepDark:[192,122,26],
+        rose:[201,107,138], gold:[184,147,58],
+        dark:[45,37,53], muted:[122,110,130], white:[255,255,255],
+        border:[232,223,240], lightBg:[250,247,251]
+      };
+
+      /* ════════════════ PAGE 1 — CALENDAR GRID ════════════════ */
+      // Header bar
+      doc.setFillColor(...C.rose);
+      doc.roundedRect(M,M,PW-M*2,14,2,2,'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...C.white);
+      doc.text('Marriage Time Tracker — The Virtuous Wife Academy\u2122',PW/2,M+9,{align:'center'});
+
+      // Legend
+      const legendItems=[
+        ['Together time',C.together],['You at work',C.her],
+        ['Him at work',C.him],['Sleep',C.sleep]
+      ];
+      let lx=M; const ly=M+18;
+      doc.setFontSize(6.5);
+      legendItems.forEach(([label,col])=>{
+        doc.setFillColor(...col);
+        doc.roundedRect(lx,ly,4,3.5,0.8,0.8,'F');
+        doc.setTextColor(...C.muted);
+        doc.text(label,lx+5.5,ly+3);
+        lx+=label.length*1.4+12;
+      });
+
+      // Grid layout
+      const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      const timeLabelW=13;
+      const sidebarW=46;
+      const gridW=PW-M*2-timeLabelW-sidebarW-4;
+      const colW=gridW/7;
+      const hours=[];
+      for(let h=5;h<29;h++) hours.push(h);
+      const rowH=4.8;
+      const gridTop=M+26;
+      const gridH=hours.length*rowH;
+
+      // Day headers
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(...C.muted);
+      days.forEach((d,i)=>{
+        doc.text(d,M+timeLabelW+i*colW+colW/2,gridTop-1.5,{align:'center'});
+      });
+
+      // Cell rows
+      hours.forEach((hourRaw,ri)=>{
+        const h=hourRaw%24;
+        const ry=gridTop+ri*rowH;
+        // time label
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(5);
+        doc.setTextColor(...C.muted);
+        doc.text(fmtH(h),M+timeLabelW-0.5,ry+rowH-0.8,{align:'right'});
+
+        for(let day=0;day<7;day++){
+          const type=getSlotType(day,h);
+          const colMap={together:C.together,her:C.her,him:C.him,sleep:C.sleep};
+          const bg=colMap[type]||C.together;
+          const cx=M+timeLabelW+day*colW;
+          doc.setFillColor(...bg);
+          doc.rect(cx+0.2,ry+0.2,colW-0.4,rowH-0.4,'F');
+          const key=day+'-'+hourRaw;
+          const txt=(slotData[key]||'').trim();
+          if(txt){
+            doc.setFont('helvetica','bold');
+            doc.setFontSize(3.8);
+            doc.setTextColor(30,10,50);
+            doc.text(txt,cx+colW/2,ry+rowH/2+0.8,{align:'center',maxWidth:colW-1});
+          }
+        }
+      });
+
+      // Grid lines
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.2);
+      doc.rect(M+timeLabelW,gridTop,gridW,gridH);
+      for(let i=1;i<7;i++) doc.line(M+timeLabelW+i*colW,gridTop,M+timeLabelW+i*colW,gridTop+gridH);
+      doc.setLineWidth(0.15);
+      for(let i=1;i<hours.length;i++) doc.line(M+timeLabelW,gridTop+i*rowH,M+timeLabelW+gridW,gridTop+i*rowH);
+
+      // ── SIDEBAR (page 1) ──
+      const sx=M+timeLabelW+gridW+4;
+      const sw=sidebarW;
+      let sy=gridTop;
+
+      // Summary cards
+      const sumItems=[
+        {label:'Together hrs/wk',id:'sum-together',bg:C.together,tc:C.togDark},
+        {label:'Your work hrs/wk',id:'sum-her',bg:C.her,tc:C.herDark},
+        {label:'His work hrs/wk',id:'sum-him',bg:C.him,tc:C.himDark},
+        {label:'Sleep hrs/wk',id:'sum-sleep',bg:C.sleep,tc:C.sleepDark}
+      ];
+      sumItems.forEach(item=>{
+        const num=document.getElementById(item.id).textContent||'0';
+        doc.setFillColor(...item.bg);
+        doc.roundedRect(sx,sy,sw,17,2,2,'F');
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(18);
+        doc.setTextColor(...item.tc);
+        doc.text(num,sx+sw/2,sy+11,{align:'center'});
+        doc.setFontSize(5);
+        doc.setFont('helvetica','normal');
+        doc.setTextColor(...C.muted);
+        doc.text(item.label,sx+sw/2,sy+15.5,{align:'center'});
+        sy+=19;
+      });
+
+      // Footer pg1
+      doc.setFont('helvetica','italic');
+      doc.setFontSize(5.5);
+      doc.setTextColor(...C.muted);
+      doc.text('The Virtuous Wife Academy\u2122  |  Page 1 of 2',PW/2,PH-4,{align:'center'});
+
+      /* ════════════════ PAGE 2 — WINDOWS + INTENTIONS ════════════════ */
+      doc.addPage();
+
+      // Header bar pg2
+      doc.setFillColor(...C.rose);
+      doc.roundedRect(M,M,PW-M*2,14,2,2,'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...C.white);
+      doc.text('Together Windows & My Intentions This Week',PW/2,M+9,{align:'center'});
+
+      // Two column layout
+      const colGap=8;
+      const halfW=(PW-M*2-colGap)/2;
+      const leftX=M;
+      const rightX=M+halfW+colGap;
+      let leftY=M+20;
+      let rightY=M+20;
+
+      /* LEFT — Together Windows */
+      doc.setFillColor(...C.togDark);
+      doc.roundedRect(leftX,leftY,halfW,8,1,1,'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...C.white);
+      doc.text('Your Together Windows \u2665',leftX+halfW/2,leftY+5.5,{align:'center'});
+      leftY+=11;
+
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(...C.muted);
+      doc.text('Hours when both of you are awake and neither is at work.',leftX,leftY);
+      leftY+=5;
+      doc.text('Protect these with intention.',leftX,leftY);
+      leftY+=7;
+
+      const togEntries=Object.entries(lastTogMap).sort((a,b)=>+a[0]-+b[0]);
+      const dayNames=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      if(togEntries.length===0){
+        doc.setFontSize(6.5);
+        doc.setTextColor(...C.muted);
+        doc.text('No shared free windows found this week.',leftX,leftY);
+        leftY+=6;
+      } else {
+        togEntries.forEach(([day,hrs])=>{
+          const span=hrs.length;
+          const badge=span>=4?'Best window':span>=2?'Good window':'Short window';
+          doc.setFillColor(...C.together);
+          doc.roundedRect(leftX,leftY,halfW,12,1.5,1.5,'F');
+          // left accent
+          doc.setFillColor(...C.togDark);
+          doc.roundedRect(leftX,leftY,2.5,12,1,1,'F');
+          doc.setFont('helvetica','bold');
+          doc.setFontSize(7.5);
+          doc.setTextColor(...C.togDark);
+          doc.text(dayNames[day],leftX+5,leftY+5);
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(6);
+          doc.setTextColor(...C.muted);
+          doc.text(fmtH(hrs[0])+' \u2013 '+fmtH((hrs[hrs.length-1]+1)%24)+'  \u00B7  '+span+' hr'+(span!==1?'s':''),leftX+5,leftY+10);
+          // badge
+          doc.setFillColor(...C.togDark);
+          doc.roundedRect(leftX+halfW-30,leftY+3,28,6,1,1,'F');
+          doc.setFont('helvetica','bold');
+          doc.setFontSize(5.5);
+          doc.setTextColor(...C.white);
+          doc.text(badge,leftX+halfW-16,leftY+7.2,{align:'center'});
+          leftY+=15;
+        });
+      }
+
+      /* RIGHT — Intentions Checklist */
+      doc.setFillColor(...C.rose);
+      doc.roundedRect(rightX,rightY,halfW,8,1,1,'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...C.white);
+      doc.text('My Intentions This Week',rightX+halfW/2,rightY+5.5,{align:'center'});
+      rightY+=11;
+
+      const intentions=[
+        'Make his lunch the night before',
+        'Leave him a note or text during the day',
+        'Protect our together windows \u2014 no errands',
+        'Pray specifically for him this week',
+        'Plan one intentional moment together',
+        'Say something affirming every day'
+      ];
+      // Collect checked states from DOM
+      const checks=[...document.querySelectorAll('.intentions-grid input[type=checkbox]')].map(c=>c.checked);
+
+      intentions.forEach((txt,i)=>{
+        const checked=checks[i]||false;
+        doc.setFillColor(253,245,248);
+        doc.roundedRect(rightX,rightY,halfW,10,1.5,1.5,'F');
+        // Checkbox circle
+        doc.setDrawColor(...C.rose);
+        doc.setLineWidth(0.5);
+        doc.circle(rightX+6,rightY+5,2.8,'S');
+        if(checked){
+          doc.setFillColor(...C.rose);
+          doc.circle(rightX+6,rightY+5,1.8,'F');
+        }
+        doc.setFont('helvetica',checked?'bolditalic':'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...(checked?C.rose:C.dark));
+        doc.text(txt,rightX+11,rightY+5.8,{maxWidth:halfW-13});
+        rightY+=12.5;
+      });
+
+      /* Notes section below intentions */
+      rightY+=3;
+      doc.setFillColor(...C.gold);
+      doc.roundedRect(rightX,rightY,halfW,8,1,1,'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...C.white);
+      doc.text('My Notes & Prayers',rightX+halfW/2,rightY+5.5,{align:'center'});
+      rightY+=11;
+
+      const notesEl=document.getElementById('notes-area');
+      const notesText=notesEl?notesEl.value.trim():'';
+      if(notesText){
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...C.dark);
+        const lines=doc.splitTextToSize(notesText,halfW);
+        lines.forEach(line=>{ doc.text(line,rightX,rightY); rightY+=5; });
+      } else {
+        // Print blank lines for handwriting
+        for(let i=0;i<5;i++){
+          doc.setDrawColor(...C.border);
+          doc.setLineWidth(0.3);
+          doc.line(rightX,rightY+4,rightX+halfW,rightY+4);
+          rightY+=8;
+        }
+      }
+
+      // Footer pg2
+      doc.setFont('helvetica','italic');
+      doc.setFontSize(5.5);
+      doc.setTextColor(...C.muted);
+      doc.text('The Virtuous Wife Academy\u2122  |  Page 2 of 2',PW/2,PH-4,{align:'center'});
+
+      doc.save('VWA-Marriage-Time-Tracker.pdf');
+    } catch(e){
+      alert('PDF generation failed: '+e.message);
+      console.error(e);
+    }
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Save / Download as PDF';
+    btn.disabled=false;
+  },120);
+}
+
+function resetAll(){
+  document.getElementById('schedule-wrapper').classList.remove('visible');
+  slotData={};
+  lastTogMap={};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
